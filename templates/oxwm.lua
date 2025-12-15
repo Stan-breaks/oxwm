@@ -236,6 +236,10 @@ function oxwm.tag.toggleview(index) end
 ---@return table Action table for keybinding
 function oxwm.tag.toggletag(index) end
 
+---When enabled an attempt to view the current tag switches back to the previously viewed tag.
+---@param enabled boolean Enable or disable tag_back_and_forth
+function oxwm.tag.set_back_and_forth(enabled) end
+
 ---Status bar configuration module
 ---@class oxwm.bar
 oxwm.bar = {}

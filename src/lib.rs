@@ -87,6 +87,7 @@ pub struct Config {
 
     // Keybindings
     pub keybindings: Vec<crate::keyboard::handlers::Key>,
+    pub tag_back_and_forth: bool,
 
     // Window rules
     pub window_rules: Vec<WindowRule>,
@@ -320,6 +321,7 @@ impl Default for Config {
                     Arg::Int(8),
                 ),
             ],
+            tag_back_and_forth: false,
             window_rules: vec![],
             status_blocks: vec![crate::bar::BlockConfig {
                 format: "{}".to_string(),

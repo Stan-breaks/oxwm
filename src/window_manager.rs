@@ -1142,11 +1142,14 @@ impl WindowManager {
         let new_tagset = tag_mask(tag_index);
 
         if new_tagset == monitor.tagset[monitor.selected_tags_index] {
-            return Ok(());
+            if !self.config.tag_back_and_forth {
+                return Ok(());
+            }
+            monitor.tagset.swap(0, 1);
+        } else {
+            monitor.selected_tags_index ^= 1;
+            monitor.tagset[monitor.selected_tags_index] = new_tagset;
         }
-
-        monitor.selected_tags_index ^= 1;
-        monitor.tagset[monitor.selected_tags_index] = new_tagset;
 
         self.save_selected_tags()?;
         self.focus(None)?;

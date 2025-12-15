@@ -26,6 +26,7 @@ pub struct ConfigBuilder {
     pub tags: Vec<String>,
     pub layout_symbols: Vec<crate::LayoutSymbolOverride>,
     pub keybindings: Vec<KeyBinding>,
+    pub tag_back_and_forth: bool,
     pub window_rules: Vec<crate::WindowRule>,
     pub status_blocks: Vec<BlockConfig>,
     pub scheme_normal: ColorScheme,
@@ -53,6 +54,7 @@ impl Default for ConfigBuilder {
             tags: vec!["1".into(), "2".into(), "3".into()],
             layout_symbols: Vec::new(),
             keybindings: Vec::new(),
+            tag_back_and_forth: false,
             window_rules: Vec::new(),
             status_blocks: Vec::new(),
             scheme_normal: ColorScheme {
@@ -89,7 +91,7 @@ pub fn register_api(lua: &Lua) -> Result<SharedBuilder, ConfigError> {
     register_border_module(&lua, &oxwm_table, builder.clone())?;
     register_client_module(&lua, &oxwm_table)?;
     register_layout_module(&lua, &oxwm_table)?;
-    register_tag_module(&lua, &oxwm_table)?;
+    register_tag_module(&lua, &oxwm_table, builder.clone())?;
     register_monitor_module(&lua, &oxwm_table)?;
     register_rule_module(&lua, &oxwm_table, builder.clone())?;
     register_bar_module(&lua, &oxwm_table, builder.clone())?;
@@ -296,7 +298,12 @@ fn register_layout_module(lua: &Lua, parent: &Table) -> Result<(), ConfigError> 
     Ok(())
 }
 
-fn register_tag_module(lua: &Lua, parent: &Table) -> Result<(), ConfigError> {
+fn register_tag_module(
+    lua: &Lua,
+    parent: &Table,
+    builder: SharedBuilder,
+) -> Result<(), ConfigError> {
+    let builder_clone = builder.clone();
     let tag_table = lua.create_table()?;
 
     let view = lua.create_function(|lua, idx: i32| {
@@ -328,6 +335,11 @@ fn register_tag_module(lua: &Lua, parent: &Table) -> Result<(), ConfigError> {
         create_action_table(lua, "ToggleTag", Value::Integer(idx as i64))
     })?;
 
+    let set_back_and_forth = lua.create_function(move |_, enabled: bool| {
+        builder_clone.borrow_mut().tag_back_and_forth = enabled;
+        Ok(())
+    })?;
+
     tag_table.set("view", view)?;
     tag_table.set("view_next", view_next)?;
     tag_table.set("view_previous", view_previous)?;
@@ -336,6 +348,7 @@ fn register_tag_module(lua: &Lua, parent: &Table) -> Result<(), ConfigError> {
     tag_table.set("toggleview", toggleview)?;
     tag_table.set("move_to", move_to)?;
     tag_table.set("toggletag", toggletag)?;
+    tag_table.set("set_back_and_forth", set_back_and_forth)?;
     parent.set("tag", tag_table)?;
     Ok(())
 }

@@ -42,6 +42,7 @@ pub fn parse_lua_config(
         tags: builder_data.tags,
         layout_symbols: builder_data.layout_symbols,
         keybindings: builder_data.keybindings,
+        tag_back_and_forth: builder_data.tag_back_and_forth,
         window_rules: builder_data.window_rules,
         status_blocks: builder_data.status_blocks,
         scheme_normal: builder_data.scheme_normal,
