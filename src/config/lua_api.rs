@@ -934,15 +934,15 @@ fn parse_color_value(value: Value) -> mlua::Result<u32> {
         Value::Number(n) => Ok(n as u32),
         Value::String(s) => {
             let s = s.to_str()?;
-            if s.starts_with('#') {
-                u32::from_str_radix(&s[1..], 16).map_err(|e| {
+            if let Some(hex) = s.strip_prefix('#') {
+                u32::from_str_radix(hex, 16).map_err(|e| {
                     mlua::Error::RuntimeError(format!(
                         "invalid hex color '{}': {}. use format like #ff0000 or 0xff0000",
                         s, e
                     ))
                 })
-            } else if s.starts_with("0x") {
-                u32::from_str_radix(&s[2..], 16).map_err(|e| {
+            } else if let Some(hex) = s.strip_prefix("0x") {
+                u32::from_str_radix(hex, 16).map_err(|e| {
                     mlua::Error::RuntimeError(format!(
                         "invalid hex color '{}': {}. use format like 0xff0000 or #ff0000",
                         s, e
