@@ -60,9 +60,9 @@ oxwm.bar.set_scheme_selected(colors.cyan, colors.bg, colors.purple)
 oxwm.key.chord({
     { { modkey }, "Space" },
     { {},         "T" }
-}, oxwm.spawn("st"))
+}, oxwm.spawn_terminal())
 
-oxwm.key.bind({ modkey }, "Return", oxwm.spawn("st"))
+oxwm.key.bind({ modkey }, "Return", oxwm.spawn_terminal())
 oxwm.key.bind({ modkey }, "D", oxwm.spawn({ "sh", "-c", "dmenu_run -l 10" }))
 oxwm.key.bind({ modkey }, "S", oxwm.spawn({ "sh", "-c", "maim -s | xclip -selection clipboard -t image/png" }))
 oxwm.key.bind({ modkey }, "Q", oxwm.client.kill())
