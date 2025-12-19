@@ -193,21 +193,20 @@ impl std::fmt::Debug for MainError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         use MainError::*;
 
-        let message = match self {
+        match self {
             CouldNotCreateConfigDir(e)
             | CouldNotWriteConfig(e)
             | FailedCheckExist(e)
             | FailedReadConfig(e) => {
-                format!("{e}")
+                write!(f, "{e}")
             }
-            FailedReadConfigTemplate(e) => format!("{e}"),
-            CouldNotStartWm(e) | BadRestartStatus(e) => format!("{e}"),
-            BadConfigPath => "Given config path does not exist".to_string(),
-            NoConfigPath => "The --config switch requires a path value".to_string(),
-            InvalidArguments => "The arguments given are invalid try --help".to_string(),
-            NoProgramName => "Could not get the program name from the environment".to_string(),
-            NoConfigDir => "Could not get the config dir".to_string(),
-        };
-        write!(f, "{message}")
+            FailedReadConfigTemplate(e) => write!(f, "{e}"),
+            CouldNotStartWm(e) | BadRestartStatus(e) => write!(f, "{e}"),
+            BadConfigPath => write!(f, "Given config path does not exist"),
+            NoConfigPath => write!(f, "The --config switch requires a path value"),
+            InvalidArguments => write!(f, "The arguments given are invalid try --help"),
+            NoProgramName => write!(f, "Could not get the program name from the environment"),
+            NoConfigDir => write!(f, "Could not get the config dir"),
+        }
     }
 }
