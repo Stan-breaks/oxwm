@@ -28,6 +28,8 @@ local colors = {
     blue = 0x6dade3,
 }
 
+asdf
+
 local modkey = "Mod1"
 
 oxwm.set_terminal("st")
@@ -56,13 +58,14 @@ oxwm.bar.set_font("JetBrainsMono Nerd Font:style=Bold:size=12")
 oxwm.bar.set_scheme_normal(colors.fg, colors.bg, 0x444444)
 oxwm.bar.set_scheme_occupied(colors.cyan, colors.bg, colors.cyan)
 oxwm.bar.set_scheme_selected(colors.cyan, colors.bg, colors.purple)
+oxwm.bar.set_scheme_urgent(colors.red, colors.bg, colors.red)
 
 oxwm.key.chord({
     { { modkey }, "Space" },
     { {},         "T" }
-}, oxwm.spawn("st"))
+}, oxwm.spawn_terminal())
 
-oxwm.key.bind({ modkey }, "Return", oxwm.spawn("st"))
+oxwm.key.bind({ modkey }, "Return", oxwm.spawn_terminal())
 oxwm.key.bind({ modkey }, "D", oxwm.spawn({ "sh", "-c", "dmenu_run -l 10" }))
 oxwm.key.bind({ modkey }, "S", oxwm.spawn({ "sh", "-c", "maim -s | xclip -selection clipboard -t image/png" }))
 oxwm.key.bind({ modkey }, "Q", oxwm.client.kill())

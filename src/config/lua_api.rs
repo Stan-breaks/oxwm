@@ -32,6 +32,7 @@ pub struct ConfigBuilder {
     pub scheme_normal: ColorScheme,
     pub scheme_occupied: ColorScheme,
     pub scheme_selected: ColorScheme,
+    pub scheme_urgent: ColorScheme,
     pub autostart: Vec<String>,
     pub auto_tile: bool,
 }
@@ -72,6 +73,11 @@ impl Default for ConfigBuilder {
                 background: 0x000000,
                 underline: 0x444444,
             },
+            scheme_urgent: ColorScheme {
+                foreground: 0xff5555,
+                background: 0x000000,
+                underline: 0xff5555,
+            },
             autostart: Vec::new(),
             auto_tile: false,
         }
@@ -85,17 +91,17 @@ pub fn register_api(lua: &Lua) -> Result<SharedBuilder, ConfigError> {
 
     let oxwm_table = lua.create_table()?;
 
-    register_spawn(&lua, &oxwm_table, builder.clone())?;
-    register_key_module(&lua, &oxwm_table, builder.clone())?;
-    register_gaps_module(&lua, &oxwm_table, builder.clone())?;
-    register_border_module(&lua, &oxwm_table, builder.clone())?;
-    register_client_module(&lua, &oxwm_table)?;
-    register_layout_module(&lua, &oxwm_table)?;
-    register_tag_module(&lua, &oxwm_table, builder.clone())?;
-    register_monitor_module(&lua, &oxwm_table)?;
-    register_rule_module(&lua, &oxwm_table, builder.clone())?;
-    register_bar_module(&lua, &oxwm_table, builder.clone())?;
-    register_misc(&lua, &oxwm_table, builder.clone())?;
+    register_spawn(lua, &oxwm_table, builder.clone())?;
+    register_key_module(lua, &oxwm_table, builder.clone())?;
+    register_gaps_module(lua, &oxwm_table, builder.clone())?;
+    register_border_module(lua, &oxwm_table, builder.clone())?;
+    register_client_module(lua, &oxwm_table)?;
+    register_layout_module(lua, &oxwm_table)?;
+    register_tag_module(lua, &oxwm_table, builder.clone())?;
+    register_monitor_module(lua, &oxwm_table)?;
+    register_rule_module(lua, &oxwm_table, builder.clone())?;
+    register_bar_module(lua, &oxwm_table, builder.clone())?;
+    register_misc(lua, &oxwm_table, builder.clone())?;
 
     lua.globals().set("oxwm", oxwm_table)?;
 
@@ -705,6 +711,21 @@ fn register_bar_module(
             Ok(())
         })?;
 
+    let builder_clone = builder.clone();
+    let set_scheme_urgent =
+        lua.create_function(move |_, (fg, bg, ul): (Value, Value, Value)| {
+            let foreground = parse_color_value(fg)?;
+            let background = parse_color_value(bg)?;
+            let underline = parse_color_value(ul)?;
+
+            builder_clone.borrow_mut().scheme_urgent = ColorScheme {
+                foreground,
+                background,
+                underline,
+            };
+            Ok(())
+        })?;
+
     bar_table.set("set_font", set_font)?;
     bar_table.set("block", block_table)?;
     bar_table.set("add_block", add_block)?; // Deprecated, for backwards compatibility
@@ -712,6 +733,7 @@ fn register_bar_module(
     bar_table.set("set_scheme_normal", set_scheme_normal)?;
     bar_table.set("set_scheme_occupied", set_scheme_occupied)?;
     bar_table.set("set_scheme_selected", set_scheme_selected)?;
+    bar_table.set("set_scheme_urgent", set_scheme_urgent)?;
     parent.set("bar", bar_table)?;
     Ok(())
 }
@@ -934,15 +956,15 @@ fn parse_color_value(value: Value) -> mlua::Result<u32> {
         Value::Number(n) => Ok(n as u32),
         Value::String(s) => {
             let s = s.to_str()?;
-            if s.starts_with('#') {
-                u32::from_str_radix(&s[1..], 16).map_err(|e| {
+            if let Some(hex) = s.strip_prefix('#') {
+                u32::from_str_radix(hex, 16).map_err(|e| {
                     mlua::Error::RuntimeError(format!(
                         "invalid hex color '{}': {}. use format like #ff0000 or 0xff0000",
                         s, e
                     ))
                 })
-            } else if s.starts_with("0x") {
-                u32::from_str_radix(&s[2..], 16).map_err(|e| {
+            } else if let Some(hex) = s.strip_prefix("0x") {
+                u32::from_str_radix(hex, 16).map_err(|e| {
                     mlua::Error::RuntimeError(format!(
                         "invalid hex color '{}': {}. use format like 0xff0000 or #ff0000",
                         s, e
