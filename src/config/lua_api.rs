@@ -392,6 +392,7 @@ fn register_rule_module(
         let title: Option<String> = config.get("title").ok();
         let is_floating: Option<bool> = config.get("floating").ok();
         let monitor: Option<usize> = config.get("monitor").ok();
+        let focus: Option<bool> = config.get("focus").ok();
 
         let tags: Option<u32> = if let Ok(tag_index) = config.get::<i32>("tag") {
             if tag_index > 0 {
@@ -408,6 +409,7 @@ fn register_rule_module(
             instance,
             title,
             tags,
+            focus,
             is_floating,
             monitor,
         };

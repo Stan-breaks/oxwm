@@ -34,6 +34,7 @@ pub struct WindowRule {
     pub instance: Option<String>,
     pub title: Option<String>,
     pub tags: Option<u32>,
+    pub focus: Option<bool>,
     pub is_floating: Option<bool>,
     pub monitor: Option<usize>,
 }

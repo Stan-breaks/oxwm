@@ -51,7 +51,7 @@ function oxwm.set_layout_symbol(name, symbol) end
 oxwm.rule = {}
 
 ---Add a window rule
----@param rule {class: string?, instance: string?, title: string?, role: string?, floating: boolean?, tag: integer?, fullscreen: boolean?} Rule configuration
+---@param rule {class: string?, instance: string?, title: string?, role: string?, floating: boolean?, tag: integer?, fullscreen: boolean?, focus: boolean?} Rule configuration
 function oxwm.rule.add(rule) end
 
 ---Quit the window manager

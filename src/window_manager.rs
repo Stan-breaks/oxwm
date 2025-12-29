@@ -1655,6 +1655,7 @@ impl WindowManager {
         let mut rule_tags: Option<u32> = None;
         let mut rule_floating: Option<bool> = None;
         let mut rule_monitor: Option<usize> = None;
+        let mut rule_focus = false;
 
         for rule in &self.config.window_rules {
             if rule.matches(&class, &instance, &title) {
@@ -1667,6 +1668,7 @@ impl WindowManager {
                 if rule.monitor.is_some() {
                     rule_monitor = rule.monitor;
                 }
+                rule_focus = rule.focus.unwrap_or(false);
             }
         }
 
@@ -1686,14 +1688,27 @@ impl WindowManager {
                 client.monitor_index = monitor_index;
             }
 
-            let tags = rule_tags.unwrap_or_else(|| {
+            let monitor_tagset = || {
                 self.monitors
                     .get(client.monitor_index)
-                    .map(|m| m.tagset[m.selected_tags_index])
+                    .map(|m| m.get_selected_tag())
                     .unwrap_or(tag_mask(0))
-            });
+            };
+
+            let tags = rule_tags.unwrap_or_else(monitor_tagset);
 
             client.tags = tags;
+
+            // Focus window rule tag if config option is set
+            if rule_focus && let Some(tag_mask) = rule_tags {
+                let tag_index = unmask_tag(tag_mask);
+                let monitor_tagset = monitor_tagset();
+                let is_tag_focused = monitor_tagset & tag_mask == tag_mask;
+
+                if !is_tag_focused {
+                    self.view_tag(tag_index)?;
+                }
+            }
         }
 
         Ok(())
