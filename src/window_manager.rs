@@ -867,7 +867,9 @@ impl WindowManager {
 
         let tiled_count = tiled_windows.len();
         if tiled_count <= visible_count {
-            if let Some(m) = self.monitors.get_mut(monitor_index) {
+            if animate && monitor.scroll_offset != 0 {
+                self.scroll_animation.start(monitor.scroll_offset, 0, &self.animation_config);
+            } else if let Some(m) = self.monitors.get_mut(monitor_index) {
                 m.scroll_offset = 0;
             }
             return Ok(());
@@ -2313,7 +2315,7 @@ impl WindowManager {
         }
 
         if self.layout.name() == "scrolling" {
-            self.scroll_to_window(window, false)?;
+            self.scroll_to_window(window, true)?;
         }
 
         self.apply_layout()?;
@@ -4721,6 +4723,9 @@ impl WindowManager {
                 let visible = self.visible_windows_on_monitor(self.selected_monitor);
                 if let Some(&new_win) = visible.last() {
                     self.focus(Some(new_win))?;
+                    if self.layout.name() == "scrolling" {
+                        self.scroll_to_window(new_win, true)?;
+                    }
                 } else if let Some(monitor) = self.monitors.get_mut(self.selected_monitor) {
                     monitor.selected_client = None;
                 }
