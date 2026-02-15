@@ -65,6 +65,9 @@ pub fn build(b: *std.Build) void {
     const multimon_step = b.step("multimon", "Alias for xephyr-multi");
     multimon_step.dependOn(&add_xephyr_run(b, exe, true).step);
 
+    const xwayland_step = b.step("xwayland", "Run in Xwayland on :2");
+    xwayland_step.dependOn(&add_xwayland_run(b, exe).step);
+
     const kill_step = b.step("kill", "Kill Xephyr and oxwm");
     kill_step.dependOn(&b.addSystemCommand(&.{ "sh", "-c", "pkill -9 Xephyr || true; pkill -9 oxwm || true" }).step);
 
@@ -87,6 +90,18 @@ fn add_xephyr_run(b: *std.Build, exe: *std.Build.Step.Compile, multimon: bool) *
     run_wm.step.dependOn(&setup.step);
     run_wm.setEnvironmentVariable("DISPLAY", ":2");
     run_wm.addArgs(&.{ "-c", "resources/test-config.lua" });
+
+    return run_wm;
+}
+
+fn add_xwayland_run(b: *std.Build, exe: *std.Build.Step.Compile) *std.Build.Step.Run {
+    const cmd = "Xwayland -retro -noreset :2 & sleep 1";
+
+    const setup = b.addSystemCommand(&.{ "sh", "-c", cmd });
+
+    const run_wm = b.addRunArtifact(exe);
+    run_wm.step.dependOn(&setup.step);
+    run_wm.setEnvironmentVariable("DISPLAY", ":2");
 
     return run_wm;
 }
